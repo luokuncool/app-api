@@ -16,11 +16,20 @@ $app->get(
     }
 );
 $app['debug']                      = true;
-$app['oauth_server']               = function () {
-    $dsn      = 'mysql:dbname=app-server;host=app-server.local';
-    $username = 'root';
-    $password = 'root';
-    $storage  = new \OAuth2\Storage\Pdo(array('dsn' => $dsn, 'username' => $username, 'password' => $password));
+
+$app->register(new Silex\Provider\DoctrineServiceProvider(), array(
+    'db.options' => array(
+        'driver'   => 'pdo_mysql',
+        'host'      => 'app-server.local',
+        'dbname'    => 'app-server',
+        'user'      => 'root',
+        'password'  => 'root',
+        'charset'   => 'utf8',
+    ),
+));
+
+$app['oauth_server']               = function (\Silex\Application $app) {
+    $storage  = new \App\Storage\Doctrine($app['db']);
     $server   = new Server($storage);
     $server->addGrantType(new ClientCredentials($storage));
     $server->addGrantType(

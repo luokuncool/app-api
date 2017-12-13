@@ -3,6 +3,9 @@
 namespace App\Controller;
 
 use OAuth2\Request;
+use OAuth2\Server;
+use OAuth2\Storage\ClientInterface;
+use OAuth2\Storage\UserCredentialsInterface;
 use Silex\Api\ControllerProviderInterface;
 use Silex\Application;
 use Silex\ControllerCollection;
@@ -23,6 +26,7 @@ class Oauth2Controller implements ControllerProviderInterface
         /** @var ControllerCollection $route */
         $route = $app['controllers_factory'];
         $route->post('/token', [$this, 'tokenAction']);
+        $route->post('/signIn', [$this, 'signInAction']);
         return $route;
     }
 
@@ -30,5 +34,16 @@ class Oauth2Controller implements ControllerProviderInterface
     {
         $app['oauth_server']->handleTokenRequest(Request::createFromGlobals())->send();
         return new Response();
+    }
+
+    public function signInAction(Application $app, \Symfony\Component\HttpFoundation\Request $request)
+    {
+        $username = $request->get('username');
+        $password = $request->get('password');
+
+        /** @var Server $server */
+        $server = $app['oauth_server'];
+
+        return new Response(print_r([$username, $password], true));
     }
 }
